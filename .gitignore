@@ -1,0 +1,8 @@
+*.exe
+old
+found_*
+*_search_links.txt
+spamro_cache
+keywords.txt
+.env
+*.csv
