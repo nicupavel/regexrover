@@ -54,9 +54,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:          
           draft: true          
-          files: |
-            ${{env.BINARY_NAME}}
-            README.md
-            .env.default
+          files: ${{env.BINARY_NAME}}            
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
