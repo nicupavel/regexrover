@@ -5,10 +5,10 @@ Crawl URLs, find matches with regex and save results
 ## Features
 
 - Can start URL crawling from Google Custom Search results using a file with keywords or by using a file with a list of URLs
-- Can define regex to skip URL, Paths or query
+- Can define regex to skip URLs hosts, paths or queries formats
 - Can define regex to match content
-- Can define DOM elements on which the regex to be applied
-- Outputs to CSV file with caching and deduplication of matches
+- Can define DOM elements for which the regex will be applied
+- Outputs to CSV file with caching and deduplication of matches (format in key/value where key is the match, and value is the URL matched)
 - Can use cache to prevent revisiting URLs that had already been crawled in a different run
 
 ## Using
