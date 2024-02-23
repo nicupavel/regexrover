@@ -1,3 +1,5 @@
+[![Build](https://github.com/nicupavel/regexrover/actions/workflows/release.yml/badge.svg)](https://github.com/nicupavel/regexrover/actions/workflows/release.yml)
+
 # RegexRover
 
 Crawl URLs, find matches with regex and save results
