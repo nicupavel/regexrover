@@ -15,43 +15,59 @@
 package regexrover
 
 import (
-	"encoding/csv"
+	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"sync"
 	"time"
+
+	_ "modernc.org/sqlite"
 )
 
-type CSVWriter struct {
+type SQLiteWriter struct {
 	cacheMaxSize int
-	file         *os.File
+	tableName    string
 	mutex        *sync.Mutex
-	writer       *csv.Writer
+	db           *sql.DB
 	cache        map[string]string
 }
 
-func (w *CSVWriter) Init(cacheMaxSize int) error {
+func (w *SQLiteWriter) Init(cacheMaxSize int) error {
 	timeStr := time.Now().Format(time.RFC3339)
-	fileName := fmt.Sprintf("found_matches_%s.csv", strings.ReplaceAll(timeStr, ":", "_"))
+	dbName := fmt.Sprintf("found_matches_%s.sqlite", strings.ReplaceAll(timeStr, ":", "_"))
+	tableName := "crawl_results"
 
-	outputFile, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	db, err := sql.Open("sqlite", dbName)
 	if err != nil {
 		log.Println("Error: ", err)
 		return err
 	}
 
+	createTableSQL := fmt.Sprintf(`
+			CREATE TABLE IF NOT EXISTS %s (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				match TEXT,
+				url TEXT
+			)`, tableName)
+
+	_, err = db.Exec(createTableSQL)
+
+	if err != nil {
+		log.Println("Error creating table: ", err)
+		return err
+	}
+
 	w.cacheMaxSize = cacheMaxSize
-	w.file = outputFile
+	w.tableName = tableName
 	w.mutex = &sync.Mutex{}
-	w.writer = csv.NewWriter(outputFile)
+	w.db = db
 	w.cache = make(map[string]string)
 
 	return nil
 }
 
-func (w *CSVWriter) WriteWithCache(key string, value string, forceWrite bool) error {
+func (w *SQLiteWriter) WriteWithCache(key string, value string, forceWrite bool) error {
 	if len(key) > 0 && len(value) > 0 {
 		w.cache[key] = value
 	}
@@ -65,23 +81,54 @@ func (w *CSVWriter) WriteWithCache(key string, value string, forceWrite bool) er
 		}
 		clear(w.cache)
 		w.mutex.Unlock()
+
 		err := w.WriteAll(records)
 		if err != nil {
 			log.Print("Error: ", err)
 			return err
 		}
-
 	}
 	return nil
 }
 
-func (w *CSVWriter) WriteAll(records [][]string) error {
+func (w *SQLiteWriter) WriteAll(records [][]string) error {
 	w.mutex.Lock()
-	err := w.writer.WriteAll(records)
+	err := w.insertRows(records)
 	w.mutex.Unlock()
 	return err
 }
 
-func (w *CSVWriter) Close() error {
-	return w.file.Close()
+func (w *SQLiteWriter) Close() error {
+	return w.db.Close()
+}
+
+func (w *SQLiteWriter) insertRows(records [][]string) error {
+	tx, err := w.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			log.Print("Error inserting rows: ", err)
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	insertRowSQL := fmt.Sprintf("INSERT INTO %s (match, url) VALUES (?, ?)", w.tableName)
+	stmt, err := tx.Prepare(insertRowSQL)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, d := range records {
+		_, err := stmt.Exec(d[0], d[1])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

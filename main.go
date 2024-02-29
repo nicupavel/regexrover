@@ -30,7 +30,7 @@ func main() {
 	}
 	rr.PrintConfig(config)
 
-	writer, err := rr.NewWriter(config.MatchOutputChunks)
+	writer, err := rr.NewWriter(config.OutputDriver, config.MatchOutputChunks)
 	if err != nil {
 		log.Fatal("Cannot open output file")
 	}
@@ -50,7 +50,7 @@ func main() {
 		crawlUrls = rr.SearchAllKeywords(keywords, config)
 	}
 
-	crawler, cerr := rr.NewCrawler(config, *writer)
+	crawler, cerr := rr.NewCrawler(config, writer)
 
 	if cerr != nil {
 		log.Fatal(cerr)
@@ -82,5 +82,9 @@ func main() {
 		log.Printf("failed to run: %s", errC)
 	}
 
+	log.Print("Finished running.")
+
+	// Write remaining cache
+	writer.WriteWithCache("", "", true)
 	defer writer.Close()
 }

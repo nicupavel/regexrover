@@ -26,6 +26,7 @@ import (
 type Config struct {
 	ApiKey                string
 	Cx                    string
+	OutputDriver          string
 	KeywordsFile          string
 	CrawlIgnoreDomains    []string
 	CrawlAllowedUrlsRegex string
@@ -63,6 +64,7 @@ func ReadEnvConfig() (Config, error) {
 	_crawlThreads := os.Getenv("CRAWL_THREADS")
 	_crawlIgnoreDomains := os.Getenv("CRAWL_IGNORE_DOMAINS")
 	_matchOutputChunks := os.Getenv("MATCH_OUTPUT_CHUNKS")
+	_outputDriver := os.Getenv("OUTPUT_DRIVER")
 
 	config.CrawlThreads, err = strconv.Atoi(_crawlThreads)
 	if err != nil {
@@ -79,6 +81,12 @@ func ReadEnvConfig() (Config, error) {
 	config.MatchOutputChunks, err = strconv.Atoi(_matchOutputChunks)
 	if err != nil {
 		config.MatchOutputChunks = 5
+	}
+
+	if strings.EqualFold(_outputDriver, "sqlite") || strings.EqualFold(_outputDriver, "csv") {
+		config.OutputDriver = strings.ToLower(_outputDriver)
+	} else {
+		config.OutputDriver = "csv"
 	}
 
 	return config, nil

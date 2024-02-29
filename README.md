@@ -59,6 +59,10 @@ Note: Both modes will output a CSV file named `found_matches_<run_date_time>.csv
 11. `CRAWL_TAG` Regex matching will be performed in all DOM elements with this tag. For example `body` will have the regex applied to all body content.
 12. `CRAWL_MATCH_REGEX` The regex to match content. Text matching this regex will be saved in the output file along with the URL
 13. `CRAWL_URLS_FILE` The file with the list of URLs to start crawling. If this is defined Google Search mode will be **ignored**
+14. `OUTPUT_DRIVER` Use `csv` or `sqlite` output. *Default: `csv`*
+
+## CRAWL_TAG options
+The `CRAWL_TAG` can be specified using the [goquery](https://github.com/PuerkitoBio/goquery) selectors.
 
 
 

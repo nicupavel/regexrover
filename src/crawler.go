@@ -43,6 +43,7 @@ func NewCrawler(config Config, writer Writer) (*Crawler, error) {
 		return &crawler, err
 	}
 
+	crawler.keepRunning = true
 	crawler.matchRegexp = regexp.MustCompile(config.CrawlMatchRegex)
 	crawler.c = colly.NewCollector(
 		colly.MaxDepth(config.CrawlDepth),
@@ -58,17 +59,39 @@ func NewCrawler(config Config, writer Writer) (*Crawler, error) {
 	}
 	crawler.c.UserAgent = config.CrawlUserAgent
 
-	// On every a element which has href attribute call callback
+	// On every a element which has href attribute visit again
+	// On every defined crawl tag match regex and save
+	/*
+		crawler.c.OnHTML("html", func(e *colly.HTMLElement) {
+			e.ForEach("a", func(_ int, el *colly.HTMLElement) {
+				if crawler.keepRunning {
+					link := el.Attr("href")
+					crawler.c.Visit(el.Request.AbsoluteURL(link))
+					log.Print("Visiting ", el.Request.AbsoluteURL(link))
+				}
+			})
+			e.ForEach(config.CrawlTag, func(_ int, el *colly.HTMLElement) {
+				regexpMatches := crawler.matchRegexp.FindAllString(e.Text, -1)
+				if len(regexpMatches) > 0 {
+					for _, v := range regexpMatches {
+						log.Printf(" * Found match: %s from %q\n", v, e.Request.URL)
+						writer.WriteWithCache(v, e.Request.URL.String(), false)
+					}
+				}
+			})
+		})
+	*/
+
 	crawler.c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		if crawler.keepRunning {
 			link := e.Attr("href")
 			crawler.c.Visit(e.Request.AbsoluteURL(link))
+			//log.Print("Visiting ", e.Request.AbsoluteURL(link))
 		}
 	})
 
 	crawler.c.OnHTML(config.CrawlTag, func(e *colly.HTMLElement) {
 		regexpMatches := crawler.matchRegexp.FindAllString(e.Text, -1)
-
 		if len(regexpMatches) > 0 {
 			for _, v := range regexpMatches {
 				log.Printf(" * Found match: %s from %q\n", v, e.Request.URL)
