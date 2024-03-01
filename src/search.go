@@ -56,7 +56,7 @@ func GoogleSearch(query string, apiKey string, cx string, startIndex int) (Searc
 				if countObj, ok := nextPage[0].(map[string]interface{}); ok {
 					if count, ok := countObj["count"].(int); ok {
 						nextCount = count
-						log.Printf("Next Count: %d\n", nextCount)
+						//log.Printf("Next Count: %d\n", nextCount)
 					} else {
 						nextCount = 0
 					}

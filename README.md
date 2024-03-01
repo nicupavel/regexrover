@@ -51,7 +51,7 @@ Note: Both modes will output a CSV file or a SQLite database named `found_matche
 3. (optional) `KEYWORDS_FILE` the file that has your keywords to search on each line will do a Google search. Can be multiple words separated by space per line
 4. `MATCH_OUTPUT_CHUNKS` Optimize file writing and deduplicate matches. After how many matches the results are saved to CVS file. *Default: 5*
 5. `CRAWL_CACHE_DIR` Directory to store the cache for the crawler. Crawler won't visit cached pages on another run. If empty it won't keep a cache
-6. `CRAWL_DEPTH` How many levels deep the crawler should go from the page URL obtained from Google or the file with links. *Default: 1*
+6. `CRAWL_DEPTH` How many levels deep the crawler should go from the page URL obtained from Google or the file with links. Use 0 for infinite recursion. *Default: 1*
 7. `CRAWL_THREADS` How many threads the crawler should use. *Default: 20*
 8. `CRAWL_IGNORE_DOMAINS` A list separated by , of domains to ignore in crawling
 9. `CRAWL_ALLOWED_URLS_REGEX` URLs matching this regex will be crawled, can be used to select certain tld or ignore paths with query strings
@@ -60,6 +60,7 @@ Note: Both modes will output a CSV file or a SQLite database named `found_matche
 12. `CRAWL_MATCH_REGEX` The regex to match content. Text matching this regex will be saved in the output file along with the URL
 13. `CRAWL_URLS_FILE` The file with the list of URLs to start crawling. If this is defined Google Search mode will be **ignored**
 14. `OUTPUT_DRIVER` Use `csv` or `sqlite` output. *Default: `csv`*
+15. `CRAWL_LOG` 0 means disable logging and only show stats, 1 means showing URLs visited and matches. *Default: 0*
 
 ## CRAWL_TAG options
 The `CRAWL_TAG` can be specified using the [goquery](https://github.com/PuerkitoBio/goquery) selectors.

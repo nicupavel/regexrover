@@ -37,6 +37,7 @@ type Config struct {
 	CrawlCacheDir         string
 	CrawlDepth            int
 	CrawlThreads          int
+	CrawlLog              bool
 	MatchOutputChunks     int
 	MaxSearchResults      int
 }
@@ -65,6 +66,7 @@ func ReadEnvConfig() (Config, error) {
 	_crawlIgnoreDomains := os.Getenv("CRAWL_IGNORE_DOMAINS")
 	_matchOutputChunks := os.Getenv("MATCH_OUTPUT_CHUNKS")
 	_outputDriver := os.Getenv("OUTPUT_DRIVER")
+	_crawlLog := os.Getenv("CRAWL_LOG")
 
 	config.CrawlThreads, err = strconv.Atoi(_crawlThreads)
 	if err != nil {
@@ -81,6 +83,13 @@ func ReadEnvConfig() (Config, error) {
 	config.MatchOutputChunks, err = strconv.Atoi(_matchOutputChunks)
 	if err != nil {
 		config.MatchOutputChunks = 5
+	}
+
+	__crawlLog, err := strconv.Atoi(_crawlLog)
+	if err != nil {
+		config.CrawlLog = false
+	} else {
+		config.CrawlLog = __crawlLog != 0
 	}
 
 	if strings.EqualFold(_outputDriver, "sqlite") || strings.EqualFold(_outputDriver, "csv") {
