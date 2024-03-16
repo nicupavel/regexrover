@@ -1,4 +1,4 @@
-module regexrover
+module github.com/nicupavel/regexrover
 
 go 1.22.0
 

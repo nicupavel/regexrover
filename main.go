@@ -18,8 +18,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	rr "regexrover/src"
 	"syscall"
+
+	rr "github.com/nicupavel/regexrover/src"
 )
 
 func main() {
