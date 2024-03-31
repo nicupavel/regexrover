@@ -81,6 +81,10 @@ func (w *CSVWriter) WriteAll(records [][]string) error {
 	return err
 }
 
+func (w *CSVWriter) GetFileName() string {
+	return w.file.Name()
+}
+
 func (w *CSVWriter) Close() error {
 	return w.file.Close()
 }

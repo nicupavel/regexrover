@@ -29,15 +29,16 @@ type SQLiteWriter struct {
 	tableName    string
 	mutex        *sync.Mutex
 	db           *sql.DB
+	dbFile       string
 	cache        map[string]string
 }
 
 func (w *SQLiteWriter) Init(cacheMaxSize int) error {
 	timeStr := time.Now().Format(time.RFC3339)
-	dbName := fmt.Sprintf("found_matches_%s.sqlite", strings.ReplaceAll(timeStr, ":", "_"))
 	tableName := "crawl_results"
+	w.dbFile = fmt.Sprintf("found_matches_%s.sqlite", strings.ReplaceAll(timeStr, ":", "_"))
 
-	db, err := sql.Open("sqlite", dbName)
+	db, err := sql.Open("sqlite", w.dbFile)
 	if err != nil {
 		errorLog("SQLiteWriter Init: ", err)
 		return err
@@ -95,6 +96,10 @@ func (w *SQLiteWriter) WriteAll(records [][]string) error {
 	err := w.insertRows(records)
 	w.mutex.Unlock()
 	return err
+}
+
+func (w *SQLiteWriter) GetFileName() string {
+	return w.dbFile
 }
 
 func (w *SQLiteWriter) Close() error {

@@ -18,6 +18,7 @@ type Writer interface {
 	WriterInit
 	WriteWithCache(key string, value string, forceWrite bool) error
 	WriteAll(records [][]string) error
+	GetFileName() string
 	Close() error
 }
 
