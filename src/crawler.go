@@ -16,7 +16,6 @@ package regexrover
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"sync/atomic"
 
@@ -25,10 +24,10 @@ import (
 )
 
 type CrawlerStats struct {
-	scraped  uint32
-	requests uint32
-	pending  int64
-	matches  uint32
+	Scraped  uint32
+	Requests uint32
+	Pending  int64
+	Matches  uint32
 }
 
 type Crawler struct {
@@ -56,10 +55,10 @@ func NewCrawler(config Config, writer Writer) (*Crawler, error) {
 	crawler.keepRunning = true
 	crawler.matchRegexp = regexp.MustCompile(config.CrawlMatchRegex)
 	crawler.stats = CrawlerStats{
-		scraped:  0,
-		requests: 0,
-		pending:  0,
-		matches:  0,
+		Scraped:  0,
+		Requests: 0,
+		Pending:  0,
+		Matches:  0,
 	}
 
 	crawler.c = colly.NewCollector(
@@ -84,14 +83,14 @@ func NewCrawler(config Config, writer Writer) (*Crawler, error) {
 				if crawler.keepRunning {
 					link := el.Attr("href")
 					crawler.c.Visit(el.Request.AbsoluteURL(link))
-					log.Print("Visiting ", el.Request.AbsoluteURL(link))
+					infoLog("Visiting ", el.Request.AbsoluteURL(link))
 				}
 			})
 			e.ForEach(config.CrawlTag, func(_ int, el *colly.HTMLElement) {
 				regexpMatches := crawler.matchRegexp.FindAllString(e.Text, -1)
 				if len(regexpMatches) > 0 {
 					for _, v := range regexpMatches {
-						log.Printf(" * Found match: %s from %q\n", v, e.Request.URL)
+						infoLog(" * Found match: %s from %q\n", v, e.Request.URL)
 						writer.WriteWithCache(v, e.Request.URL.String(), false)
 					}
 				}
@@ -104,7 +103,7 @@ func NewCrawler(config Config, writer Writer) (*Crawler, error) {
 			link := e.Attr("href")
 			e.Request.Visit(link)
 			if config.CrawlLog {
-				log.Print("Visiting ", e.Request.AbsoluteURL(link))
+				debugLog("Visiting %s", e.Request.AbsoluteURL(link))
 			}
 		}
 	})
@@ -113,25 +112,27 @@ func NewCrawler(config Config, writer Writer) (*Crawler, error) {
 		regexpMatches := crawler.matchRegexp.FindAllString(e.Text, -1)
 		if len(regexpMatches) > 0 {
 			for _, v := range regexpMatches {
-				atomic.AddUint32(&crawler.stats.matches, 1)
+				atomic.AddUint32(&crawler.stats.Matches, 1)
 				writer.WriteWithCache(v, e.Request.URL.String(), false)
 				if config.CrawlLog {
-					log.Printf(" * Found match: %s from %q\n", v, e.Request.URL)
+					infoLog("Found match: %s from %q\n", v, e.Request.URL)
 				}
 			}
 		}
 	})
 
 	crawler.c.OnRequest(func(r *colly.Request) {
-		atomic.AddUint32(&crawler.stats.requests, 1)
-		atomic.AddInt64(&crawler.stats.pending, 1)
+		atomic.AddUint32(&crawler.stats.Requests, 1)
+		atomic.AddInt64(&crawler.stats.Pending, 1)
 	})
 
 	crawler.c.OnScraped(func(res *colly.Response) {
-		atomic.AddUint32(&crawler.stats.scraped, 1)
-		atomic.AddInt64(&crawler.stats.pending, -1)
+		atomic.AddUint32(&crawler.stats.Scraped, 1)
+		atomic.AddInt64(&crawler.stats.Pending, -1)
 		if !config.CrawlLog {
-			crawler.printStats()
+			crawler.consoleWriteStats()
+		} else {
+			miscLog("%+v", crawler.stats)
 		}
 	})
 
@@ -141,9 +142,9 @@ func NewCrawler(config Config, writer Writer) (*Crawler, error) {
 func (crawler *Crawler) QueueAdd(crawlUrls []string) (int, error) {
 	for _, link := range crawlUrls {
 		if err := crawler.q.AddURL(link); err != nil {
-			log.Printf("failed to add URL: %s\n%v", link, err)
+			errorLog("Failed to add URL: %s\n%v", link, err)
 		} else {
-			crawler.stats.pending++
+			crawler.stats.Pending++
 		}
 	}
 
@@ -163,6 +164,6 @@ func (crawler *Crawler) GetStats() CrawlerStats {
 	return crawler.stats
 }
 
-func (crawler *Crawler) printStats() {
+func (crawler *Crawler) consoleWriteStats() {
 	fmt.Printf("\033[2K\r%+v", crawler.stats)
 }

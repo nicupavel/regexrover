@@ -17,7 +17,6 @@ package regexrover
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -56,7 +55,7 @@ func GoogleSearch(query string, apiKey string, cx string, startIndex int) (Searc
 				if countObj, ok := nextPage[0].(map[string]interface{}); ok {
 					if count, ok := countObj["count"].(int); ok {
 						nextCount = count
-						//log.Printf("Next Count: %d\n", nextCount)
+						//infoLog("Next Count: %d\n", nextCount)
 					} else {
 						nextCount = 0
 					}
@@ -91,12 +90,13 @@ func SearchAllKeywords(keywords []string, config Config) []string {
 	keywordIndex := 0
 	startIndex := 0
 	var links []string
+
 	for {
 		query := url.QueryEscape(keywords[keywordIndex])
-		log.Printf("Looking for %s query results index %d\n", query, startIndex)
+		debugLog("Looking for %s query results index %d\n", query, startIndex)
 		results, err := GoogleSearch(query, config.ApiKey, config.Cx, startIndex)
 		if err != nil {
-			log.Println("Error/End of results:", err)
+			errorLog("Error/End of results:", err)
 			startIndex = config.MaxSearchResults
 		}
 

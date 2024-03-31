@@ -17,7 +17,6 @@ package regexrover
 import (
 	"encoding/csv"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"sync"
@@ -38,7 +37,7 @@ func (w *CSVWriter) Init(cacheMaxSize int) error {
 
 	outputFile, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
-		log.Println("Error: ", err)
+		errorLog("CSVWriter Init: ", err)
 		return err
 	}
 
@@ -67,7 +66,7 @@ func (w *CSVWriter) WriteWithCache(key string, value string, forceWrite bool) er
 		w.mutex.Unlock()
 		err := w.WriteAll(records)
 		if err != nil {
-			log.Print("Error: ", err)
+			errorLog("WriteWithCache: ", err)
 			return err
 		}
 

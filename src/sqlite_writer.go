@@ -17,7 +17,6 @@ package regexrover
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -40,7 +39,7 @@ func (w *SQLiteWriter) Init(cacheMaxSize int) error {
 
 	db, err := sql.Open("sqlite", dbName)
 	if err != nil {
-		log.Println("Error: ", err)
+		errorLog("SQLiteWriter Init: ", err)
 		return err
 	}
 
@@ -54,7 +53,7 @@ func (w *SQLiteWriter) Init(cacheMaxSize int) error {
 	_, err = db.Exec(createTableSQL)
 
 	if err != nil {
-		log.Println("Error creating table: ", err)
+		errorLog("Error creating table: ", err)
 		return err
 	}
 
@@ -84,7 +83,7 @@ func (w *SQLiteWriter) WriteWithCache(key string, value string, forceWrite bool)
 
 		err := w.WriteAll(records)
 		if err != nil {
-			log.Print("Error: ", err)
+			errorLog("Error: ", err)
 			return err
 		}
 	}
@@ -109,7 +108,7 @@ func (w *SQLiteWriter) insertRows(records [][]string) error {
 	}
 	defer func() {
 		if err != nil {
-			log.Print("Error inserting rows: ", err)
+			errorLog("Error inserting rows: ", err)
 			tx.Rollback()
 			return
 		}
