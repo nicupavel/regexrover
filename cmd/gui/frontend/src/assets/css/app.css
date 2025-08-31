@@ -1,0 +1,7 @@
+body {
+    background-color: var(--surface-section);
+}
+
+#app {
+    height: 100vh;    
+}

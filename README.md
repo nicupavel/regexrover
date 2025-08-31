@@ -13,13 +13,20 @@ Crawl URLs, find matches with regex and save results
 - Outputs to CSV file or SQLite database with caching and deduplication of matches (format in key/value where key is the match, and value is the URL matched)
 - Can use cache to prevent revisiting URLs that had already been crawled in a different run
 
-## Using
+## Using CLI
 
 `git clone https://github.com/nicupavel/regexrover && cd regexrover`
 
+`go get github.com/wailsapp/wails/v2`
+`go mod tidy`
+
 `cp .env.default .env`
 
-`go run .`
+`go run ./cmd/cli` 
+
+## Using GUI
+
+`cd cmd/gui/frontend; npm i; cd - ; cd cmd/gui ; wails build `
 
 ## Running modes
 
