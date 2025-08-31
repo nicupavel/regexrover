@@ -87,4 +87,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: cmd/gui/build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: cmd/gui/build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}.exe
