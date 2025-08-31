@@ -28,6 +28,8 @@ Crawl URLs, find matches with regex and save results
 
 `cd cmd/gui/frontend; npm i; cd - ; cd cmd/gui ; wails build `
 
+<img width="1010" height="761" alt="Screenshot 2025-08-31 111559" src="https://github.com/user-attachments/assets/04e60612-85aa-4a91-90c7-d05711fc0995" />
+
 ## Running modes
 
 1. **Google Custom Search** - will search for keywords from a file and crawl the URLs from the search results
