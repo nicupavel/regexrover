@@ -43,6 +43,7 @@ jobs:
       # Install Node.js (for frontend)
       # -------------------------------
       - name: Set up Node.js
+        if: matrix.goos == 'windows'
         uses: actions/setup-node@v4
         with:
           node-version: "18"
@@ -51,25 +52,39 @@ jobs:
       # Install Wails
       # -------------------------------
       - name: Install Wails
+        if: matrix.goos == 'windows'
         run: |
           go install github.com/wailsapp/wails/v2/cmd/wails@latest
           echo "${HOME}/go/bin" >> $GITHUB_PATH
 
       # -------------------------------
-      # Build GUI (frontend + Wails)
+      # Build GUI (frontend + Wails) Windows only
       # -------------------------------
       - name: Build GUI
+        if: matrix.goos == 'windows'
         run: |
           cd cmd/gui/frontend
           npm install
           cd ..
-          wails build -o ../../build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }} -m
+          EXT=""
+          if [ "${{ matrix.goos }}" == "windows" ]; then EXT=".exe"; fi
+          wails build -o ../../build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}$EXT -m
 
       # -------------------------------
-      # Upload artifacts (CLI + GUI)
+      # Upload CLI artifact (all platforms)
       # -------------------------------
-      - name: Upload release artifacts
+      - name: Upload CLI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: regexrover-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: buidl/bin/*
+          name: regexrover-cli-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: build/bin/regexrover-${{ matrix.goos }}-${{ matrix.goarch }}
+
+      # -------------------------------
+      # Upload GUI artifact (Windows only)
+      # -------------------------------
+      - name: Upload GUI artifact
+        if: matrix.goos == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}
