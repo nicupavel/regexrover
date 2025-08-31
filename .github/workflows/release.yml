@@ -68,7 +68,7 @@ jobs:
           cd ..
           EXT=""
           if [ "${{ matrix.goos }}" == "windows" ]; then EXT=".exe"; fi
-          wails build -o ../../build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}$EXT -m --platform windows/amd64
+          wails build -o build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}$EXT -m --platform windows/amd64
 
       # -------------------------------
       # Upload CLI artifact (all platforms)
@@ -77,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: regexrover-cli-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: build/bin/regexrover-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: bin/regexrover-${{ matrix.goos }}-${{ matrix.goarch }}
 
       # -------------------------------
       # Upload GUI artifact (Windows only)
@@ -87,4 +87,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: cmd/gui/build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}
