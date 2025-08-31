@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        goos: [windows, linux, darwin]
+        goos: [windows]
         goarch: [amd64]
     runs-on: ubuntu-latest
 
