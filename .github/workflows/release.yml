@@ -1,62 +1,75 @@
+name: Release
+
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    tags:
+      - "v*.*.*"   # e.g. v1.0.0
 
-name: Build
-
-defaults:
-  run:
-    shell: bash
-    
-permissions:
-  contents: write
-  
 jobs:
   build:
-    name: Build binary
-    runs-on: 'ubuntu-latest'
     strategy:
       matrix:
-        goosarch:
-          - 'darwin/amd64'
-          - 'darwin/arm64'
-          #- 'freebsd/amd64'
-          #- 'freebsd/arm64'
-          - 'linux/amd64'
-          #- 'linux/arm'
-          - 'linux/arm64'
-          #- 'linux/mips'
-          #- 'linux/mips64'
-          #- 'linux/mips64le'
-          #- 'linux/mipsle'
-          #- 'linux/ppc64'
-          #- 'linux/ppc64le'
-          #- 'linux/riscv64'          
-          - 'windows/amd64'
+        goos: [windows, linux, darwin]
+        goarch: [amd64]
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.22.0'
-      - name: Get OS and arch info
+          go-version: "1.22"
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # -------------------------------
+      # CLI build
+      # -------------------------------
+      - name: Build CLI
         run: |
-          GOOSARCH=${{matrix.goosarch}}
-          GOOS=${GOOSARCH%/*}
-          GOARCH=${GOOSARCH#*/}
-          BINARY_NAME=${{github.repository}}-$GOOS-$GOARCH
-          echo "BINARY_NAME=$BINARY_NAME" >> $GITHUB_ENV
-          echo "GOOS=$GOOS" >> $GITHUB_ENV
-          echo "GOARCH=$GOARCH" >> $GITHUB_ENV
-      - name: Build
+          go build -o bin/regexrover-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/cli
+
+      # -------------------------------
+      # Install Node.js (for frontend)
+      # -------------------------------
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      # -------------------------------
+      # Install Wails
+      # -------------------------------
+      - name: Install Wails
         run: |
-          go build -o "$BINARY_NAME" -v
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:          
-          draft: true          
-          files: ${{env.BINARY_NAME}}            
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          go install github.com/wailsapp/wails/v2/cmd/wails@latest
+          echo "${HOME}/go/bin" >> $GITHUB_PATH
+
+      # -------------------------------
+      # Build GUI (frontend + Wails)
+      # -------------------------------
+      - name: Build GUI
+        run: |
+          cd cmd/gui/frontend
+          npm install
+          cd ..
+          wails build -o ../../build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }} -m
+
+      # -------------------------------
+      # Upload artifacts (CLI + GUI)
+      # -------------------------------
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: regexrover-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: buidl/bin/*
