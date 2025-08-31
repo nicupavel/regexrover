@@ -68,7 +68,7 @@ jobs:
           cd ..
           EXT=""
           if [ "${{ matrix.goos }}" == "windows" ]; then EXT=".exe"; fi
-          wails build -o ../../build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}$EXT -m
+          wails build -o ../../build/bin/regexrover-gui-${{ matrix.goos }}-${{ matrix.goarch }}$EXT -m --platform windows/amd64
 
       # -------------------------------
       # Upload CLI artifact (all platforms)
